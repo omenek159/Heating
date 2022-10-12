@@ -23,6 +23,8 @@ LOG_LEVEL = "INFO"
 # Other constants - do not change
 HVAC_HEAT = "heat"
 HVAC_OFF = "off"
+PRESET_ROOM_OFF = "room_off"
+PRESET_MANUAL = "manual"
 ATTR_SWITCH_HEATING = "switch_heating"
 ATTR_SOMEBODY_HOME = "somebody_home"
 ATTR_HEATING_MODE = "heating_mode"
@@ -37,6 +39,8 @@ ATTR_NAME = "name"
 ATTR_CURRENT_TEMP = "current_temperature"
 ATTR_HVAC_MODE = "hvac_mode"
 ATTR_HVAC_MODES = "hvac_modes"
+ATTR_PRESET_MODE = "preset_mode"
+ATTR_PRESET_MODES = "preset_modes"
 ATTR_TEMPERATURE = "temperature"
 ATTR_UNKNOWN = "unknown"
 ATTR_UNAVAILABLE = "unavailable"
@@ -232,9 +236,11 @@ class HeatingControl(hass.Hass):
             current_temp = self.__get_current_temp(termostat=entity_id)
         if mode is None:
             if self.is_heating():
-                mode = HVAC_HEAT
+                # mode = HVAC_HEAT
+                mode = PRESET_MANUAL
             else:
-                mode = HVAC_OFF
+                # mode = HVAC_OFF
+                mode = PRESET_ROOM_OFF
         self.log(
             f"Updating thermostat {entity_id}: "
             f"temperature {target_temp}, "
@@ -242,12 +248,13 @@ class HeatingControl(hass.Hass):
             f"current temperature {current_temp}."
         )
         if current_temp is not None and target_temp is not None and mode is not None:
-            attrs = {}
-            attrs[ATTR_CURRENT_TEMP] = current_temp
-            attrs[ATTR_TEMPERATURE] = target_temp
-            attrs[ATTR_HVAC_MODE] = mode
-            attrs[ATTR_HVAC_MODES] = [HVAC_HEAT, HVAC_OFF]
-            self.set_state(entity_id, state=mode, attributes=attrs)
+            # attrs = {}
+            # attrs[ATTR_CURRENT_TEMP] = current_temp
+            # attrs[ATTR_TEMPERATURE] = target_temp
+            # attrs[ATTR_HVAC_MODE] = mode
+            # attrs[ATTR_HVAC_MODES] = [HVAC_HEAT, HVAC_OFF]
+            # self.set_state(entity_id, state=mode, attributes=attrs)
+            self.call_service("climate/set_preset_mode", entity_id=entity_id, preset_mode=mode)
             self.call_service(
                 "climate/set_temperature", entity_id=entity_id, temperature=target_temp
             )
@@ -334,9 +341,11 @@ class HeatingControl(hass.Hass):
                 temperature = float(self.get_state(room[ATTR_SENSOR]))
                 target_temperature = self.__get_target_room_temp(room)
                 if self.is_heating():
-                    mode = HVAC_HEAT
+                    # mode = HVAC_HEAT
+                    mode = PRESET_MANUAL
                 else:
-                    mode = HVAC_OFF
+                    # mode = HVAC_OFF
+                    mode = PRESET_ROOM_OFF
                 for thermostat in room[ATTR_THERMOSTATS]:
                     if vacation:
                         self.__set_thermostat(
