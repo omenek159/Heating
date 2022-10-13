@@ -16,7 +16,7 @@ MODE_AUTO = "auto"
 MODE_ECO = "eco"
 MODE_VACATION = "vacation"
 
-HYSTERESIS = 1.0  # Difference between the temperature to turn heating on and off (to avoid frequent switching)
+HYSTERESIS = 0.5  # Difference between the temperature to turn heating on and off (to avoid frequent switching)
 MIN_TEMPERATURE = 10  # Always turn on if teperature is below
 LOG_LEVEL = "INFO"
 
@@ -253,8 +253,10 @@ class HeatingControl(hass.Hass):
             # attrs[ATTR_HVAC_MODE] = mode
             # attrs[ATTR_HVAC_MODES] = [HVAC_HEAT, HVAC_OFF]
             # self.set_state(entity_id, state=mode, attributes=attrs)
-            self.call_service("climate/set_preset_mode", entity_id=entity_id, preset_mode=mode)
-            if mode != "ROOM_OFF":
+            current_preset = self.get_entity(entity_id).get_state(attribute="preset_mode")
+            if mode != current_preset:
+                self.call_service("climate/set_preset_mode", entity_id=entity_id, preset_mode=mode)
+            if mode != PRESET_ROOM_OFF:
                 self.call_service("climate/set_temperature", entity_id=entity_id, temperature=target_temp)
 
     def __get_target_room_temp(self, room) -> float:
