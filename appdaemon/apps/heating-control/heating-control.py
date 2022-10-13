@@ -40,7 +40,6 @@ ATTR_CURRENT_TEMP = "current_temperature"
 ATTR_HVAC_MODE = "hvac_mode"
 ATTR_HVAC_MODES = "hvac_modes"
 ATTR_PRESET_MODE = "preset_mode"
-ATTR_PRESET_MODES = "preset_modes"
 ATTR_TEMPERATURE = "temperature"
 ATTR_UNKNOWN = "unknown"
 ATTR_UNAVAILABLE = "unavailable"
@@ -255,9 +254,8 @@ class HeatingControl(hass.Hass):
             # attrs[ATTR_HVAC_MODES] = [HVAC_HEAT, HVAC_OFF]
             # self.set_state(entity_id, state=mode, attributes=attrs)
             self.call_service("climate/set_preset_mode", entity_id=entity_id, preset_mode=mode)
-            self.call_service(
-                "climate/set_temperature", entity_id=entity_id, temperature=target_temp
-            )
+            if mode != "ROOM_OFF":
+                self.call_service("climate/set_temperature", entity_id=entity_id, temperature=target_temp)
 
     def __get_target_room_temp(self, room) -> float:
         """Returns target room temparture, based on day/night switch (not considering vacation)"""
